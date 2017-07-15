@@ -49,6 +49,7 @@
     <Compile Include="ConsoleCanvasRenderer.cs" />
     <Compile Include="ICanvas.cs" />
     <Compile Include="ICanvasRenderer.cs" />
+    <Compile Include="Point.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

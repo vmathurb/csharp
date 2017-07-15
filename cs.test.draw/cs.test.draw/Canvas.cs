@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace cs.test.draw
 {
@@ -40,28 +41,28 @@ namespace cs.test.draw
 
             for (int i = 0; i < width + 2; i++)
             {
-                _canvasPoints[0, i] = HORIZONTAL_BORDER_CHAR;
-                _canvasPoints[height + 1, i] = HORIZONTAL_BORDER_CHAR;
+                SetColorCode(i, 0, HORIZONTAL_BORDER_CHAR);
+                SetColorCode(i, height + 1, HORIZONTAL_BORDER_CHAR);
             }
 
             for (int i = 1; i <= height; i++)
             {
-                _canvasPoints[i, 0] = VERTICAL_BORDER_CHAR;
-                _canvasPoints[i, width + 1] = VERTICAL_BORDER_CHAR;
+                SetColorCode(0, i, VERTICAL_BORDER_CHAR);
+                SetColorCode(width + 1, i, VERTICAL_BORDER_CHAR);
             }
         }
 
-        int ICanvas.Height
+        public int Height
         {
             get { return this._height; }
         }
 
-        int ICanvas.Width
+        public int Width
         {
             get { return this._width; }
         }
 
-        void ICanvas.DrawLine(int x1, int y1, int x2, int y2)
+        public void DrawLine(int x1, int y1, int x2, int y2)
         {
             // TODO: Split validation out
 
@@ -97,7 +98,7 @@ namespace cs.test.draw
 
                 for (int y = lower; y <= higher; y++)
                 {
-                    _canvasPoints[y, x1] = LINE_CHAR;
+                    SetColorCode(x1, y, LINE_CHAR);
                 }
             }
             else
@@ -107,20 +108,20 @@ namespace cs.test.draw
 
                 for (int x = lower; x <= higher; x++)
                 {
-                    _canvasPoints[y1,x] = LINE_CHAR;
+                    SetColorCode(x, y1, LINE_CHAR);
                 }
             }
         }
 
-        void ICanvas.DrawRectangle(int upperLeftx1, int upperLefty1, int lowerRightx2, int lowerRighty2)
+        public void DrawRectangle(int upperLeftx1, int upperLefty1, int lowerRightx2, int lowerRighty2)
         {
-            (this as ICanvas).DrawLine(upperLeftx1, upperLefty1, upperLeftx1, lowerRighty2);
-            (this as ICanvas).DrawLine(upperLeftx1, lowerRighty2, lowerRightx2, lowerRighty2);
-            (this as ICanvas).DrawLine(lowerRightx2, lowerRighty2, lowerRightx2, upperLefty1);
-            (this as ICanvas).DrawLine(lowerRightx2, upperLefty1, upperLeftx1, upperLefty1);
+            DrawLine(upperLeftx1, upperLefty1, upperLeftx1, lowerRighty2);
+            DrawLine(upperLeftx1, lowerRighty2, lowerRightx2, lowerRighty2);
+            DrawLine(lowerRightx2, lowerRighty2, lowerRightx2, upperLefty1);
+            DrawLine(lowerRightx2, upperLefty1, upperLeftx1, upperLefty1);
         }
 
-        void ICanvas.BucketFillAreaConnectedTo(int x, int y, char colorCode)
+        public void BucketFillAreaConnectedTo(int x, int y, char colorCode)
         {
             if (!InCanvasWidthBounds(x))
             {
@@ -138,24 +139,24 @@ namespace cs.test.draw
                     String.Format("Fill char {0} cannot match line char {1}", colorCode, LINE_CHAR));
             }
 
-            if (LINE_CHAR == _canvasPoints[y, x])
+            if (LINE_CHAR == GetColorCode(x,y))
             {
                 // NOTE: Assumption that bucket fill with point on line does nothing
                 return;
             }
 
-            Fill(x, y, colorCode);
+            ScanLineFill(x, y, colorCode);
         }
 
         private void Fill(int x, int y, char colorCode)
         {
-            if (colorCode == _canvasPoints[y, x] || LINE_CHAR == _canvasPoints[y, x])
+            if (colorCode == GetColorCode(x, y) || LINE_CHAR == GetColorCode(x, y))
             {
                 return;
             }
             else
             {
-                _canvasPoints[y, x] = colorCode;
+                SetColorCode(x, y, colorCode);
             }
 
             if (x + 1 <= _width)
@@ -171,39 +172,70 @@ namespace cs.test.draw
                 Fill(x, y - 1, colorCode);
         }
 
-        void ScanFill(int x, int y, char colorCode)
+        void ScanLineFill(int x, int y, char colorCode)
         {
-            for (int xleft = x; xleft >= 0; xleft--)
+            Queue<Point> pointQueue = new Queue<Point>();
+            pointQueue.Enqueue(new Point(x, y));
+
+            while (pointQueue.Count > 0)
             {
-                for (int ytop = y; ytop < _height + 2; ytop++)
+                Point p = pointQueue.Dequeue();
+
+                for (int xleft = p.X; xleft > 0; xleft--)
                 {
-                    if (_canvasPoints[xleft, ytop] != LINE_CHAR)
+
+                    if (GetColorCode(xleft, p.Y) != LINE_CHAR)
                     {
-                        _canvasPoints[xleft, ytop] = colorCode;
+                        SetColorCode(xleft, p.Y, colorCode);
                     }
                     else
                     {
                         break;
+                    }
+
+                    if (p.Y + 1 < _height + 1 && GetColorCode(xleft, p.Y + 1) != LINE_CHAR && GetColorCode(xleft, p.Y + 1) != colorCode)
+                    {
+                        pointQueue.Enqueue(new Point(xleft, p.Y + 1));
+                    }
+
+                    if (p.Y - 1 > 0 && GetColorCode(xleft, p.Y - 1) != LINE_CHAR && GetColorCode(xleft, p.Y - 1) != colorCode)
+                    {
+                        pointQueue.Enqueue(new Point(xleft, p.Y - 1));
                     }
                 }
 
-                for (int ybottom = y - 1; ybottom >= 0; ybottom--)
+                for (int xright = p.X; xright < _width + 1; xright++)
                 {
-                    if (_canvasPoints[xleft, ybottom] != LINE_CHAR)
+                    if (GetColorCode(xright, p.Y) != LINE_CHAR)
                     {
-                        _canvasPoints[xleft, ybottom] = colorCode;
+                        SetColorCode(xright, p.Y, colorCode);
                     }
                     else
                     {
                         break;
+                    }
+
+                    if (p.Y + 1 < _height + 1 && GetColorCode(xright, p.Y + 1) != LINE_CHAR && GetColorCode(xright, p.Y + 1) != colorCode)
+                    {
+                        pointQueue.Enqueue(new Point(xright, p.Y + 1));
+                    }
+
+                    if (p.Y - 1 > 0 && GetColorCode(xright, p.Y - 1) != LINE_CHAR && GetColorCode(xright, p.Y - 1) != colorCode)
+                    {
+                        pointQueue.Enqueue(new Point(xright, p.Y - 1));
                     }
                 }
             }
         }
 
-        char ICanvas.QueryPoint(int x, int y)
+        public char GetColorCode(int x, int y)
         {
-            return _canvasPoints[y, x]; 
+            return _canvasPoints[y, x];
+        }
+
+        public void SetColorCode(int x, int y, char colorCode)
+        {
+            _canvasPoints[y, x] = colorCode;
         }
     }
 }

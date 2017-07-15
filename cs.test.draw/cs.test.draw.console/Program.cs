@@ -12,9 +12,9 @@ namespace cs.test.draw.console
         {
             ICanvas canvas = new Canvas(20, 8);
 
-            canvas.DrawLine(3, 2, 6, 2);
-            canvas.DrawRectangle(1, 7, 15, 3);
-            canvas.BucketFillAreaConnectedTo(5, 4, 'p');
+            canvas.DrawLine(6, 5, 9, 5);
+            canvas.DrawRectangle(2, 8, 15, 3);
+            canvas.BucketFillAreaConnectedTo(8, 6, 'p');
             
             //canvas.DrawLine(3, 3, 6, 3);
             //canvas.DrawLine(6, 3, 6, 6);

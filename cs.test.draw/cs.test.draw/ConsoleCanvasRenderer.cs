@@ -14,7 +14,7 @@ namespace cs.test.draw
 
                 for (int x = 0; x <= canvas.Width + 1; x++)
                 {
-                    Console.Write(canvas.QueryPoint(x, y));
+                    Console.Write(canvas.GetColorCode(x, y));
                 }
 
                 Console.WriteLine();

@@ -163,24 +163,24 @@ namespace cs.test.draw.tests
 
             canvas.DrawLine(3, 2, 6, 2);
 
-            Assert.IsTrue('x' == canvas.QueryPoint(5, 2));
+            Assert.IsTrue('x' == canvas.GetColorCode(5, 2));
 
-            char lower = canvas.QueryPoint(5, 1);
-            char lowerLeft = canvas.QueryPoint(4, 1);
-            char lowerRight = canvas.QueryPoint(6, 1);
-            char upper = canvas.QueryPoint(5, 3);
-            char upperLeft = canvas.QueryPoint(4, 3);
-            char upperRight = canvas.QueryPoint(6, 3);
+            char lower = canvas.GetColorCode(5, 1);
+            char lowerLeft = canvas.GetColorCode(4, 1);
+            char lowerRight = canvas.GetColorCode(6, 1);
+            char upper = canvas.GetColorCode(5, 3);
+            char upperLeft = canvas.GetColorCode(4, 3);
+            char upperRight = canvas.GetColorCode(6, 3);
 
             canvas.BucketFillAreaConnectedTo(5, 2, 'c');
 
-            Assert.IsTrue('x' == canvas.QueryPoint(5, 2));
-            Assert.IsTrue(lower == canvas.QueryPoint(5, 1));
-            Assert.IsTrue(lowerLeft == canvas.QueryPoint(4, 1));
-            Assert.IsTrue(lowerRight == canvas.QueryPoint(6, 1));
-            Assert.IsTrue(upper == canvas.QueryPoint(5, 3));
-            Assert.IsTrue(upperLeft == canvas.QueryPoint(4, 3));
-            Assert.IsTrue(upperRight == canvas.QueryPoint(6, 3));
+            Assert.IsTrue('x' == canvas.GetColorCode(5, 2));
+            Assert.IsTrue(lower == canvas.GetColorCode(5, 1));
+            Assert.IsTrue(lowerLeft == canvas.GetColorCode(4, 1));
+            Assert.IsTrue(lowerRight == canvas.GetColorCode(6, 1));
+            Assert.IsTrue(upper == canvas.GetColorCode(5, 3));
+            Assert.IsTrue(upperLeft == canvas.GetColorCode(4, 3));
+            Assert.IsTrue(upperRight == canvas.GetColorCode(6, 3));
         }
 
         #endregion

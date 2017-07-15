@@ -41,8 +41,13 @@ namespace cs.test.draw
         void BucketFillAreaConnectedTo(int x, int y, char colorCode);
 
         /// <summary>
-        /// Returns color code at given point
+        /// Gets color code at given point
         /// </summary>
-        char QueryPoint(int x, int y);
+        char GetColorCode(int x, int y);
+
+        /// <summary>
+        /// Set color code at given point
+        /// </summary>
+        void SetColorCode(int x, int y, char colorCode);
     }
 }
