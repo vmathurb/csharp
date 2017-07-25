@@ -1,0 +1,32 @@
+﻿[
+  {
+    "TradeType": "IRSwap",
+    "TCN": "IRSwap11",
+    "Cost": 1
+  },
+  {
+    "TradeType": "IRSwap",
+    "TCN": "IRSwap12",
+    "Cost": 1
+  },
+  {
+    "TradeType": "IRSwap",
+    "TCN": "IRSwap13",
+    "Cost": 1
+  },
+  {
+    "TradeType": "IROption",
+    "TCN": "IROption14",
+    "Cost": 3
+  },
+  {
+    "TradeType": "IROption",
+    "TCN": "IROption12",
+    "Cost": 4
+  },
+  {
+    "TradeType": "IRExotic",
+    "TCN": "IRExotic11",
+    "Cost": 6
+  }
+]

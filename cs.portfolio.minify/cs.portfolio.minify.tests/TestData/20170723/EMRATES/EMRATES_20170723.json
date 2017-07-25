@@ -1,0 +1,35 @@
+﻿{
+  "Name": "EMRATES",
+  "Trades": [
+    {
+      "TradeType": "IRSwap",
+      "TCN": "IRSwap11",
+      "MarketDependencies": [ "DiscountCurve~SGD", "LiborCurve~SGD~SIBOR~3M", "FxSpot~SGD~USD" ]
+    },
+    {
+      "TradeType": "IRSwap",
+      "TCN": "IRSwap12",
+      "MarketDependencies": [ "DiscountCurve~SGD", "LiborCurve~SGD~SIBOR~3M", "FxSpot~SGD~USD" ]
+    },
+    {
+      "TradeType": "IRSwap",
+      "TCN": "IRSwap13",
+      "MarketDependencies": [ "DiscountCurve~SGD", "LiborCurve~SGD~SIBOR~6M", "FxSpot~SGD~USD" ]
+    },
+    {
+      "TradeType": "IROption",
+      "TCN": "IROption14",
+      "MarketDependencies": [ "DiscountCurve~SGD", "LiborCurve~SGD~SIBOR~3M", "FxSpot~SGD~USD", "IRSVMVolObject~SGD~SIBOR" ]
+    },
+    {
+      "TradeType": "IROption",
+      "TCN": "IROption12",
+      "MarketDependencies": [ "DiscountCurve~SGD", "LiborCurve~SGD~SIBOR~3M", "FxSpot~SGD~USD", "IRSVMVolObject~SGD~SIBOR" ]
+    },
+    {
+      "TradeType": "IRExotic",
+      "TCN": "IRExotic11",
+      "MarketDependencies": [ "DiscountCurve~SGD", "LiborCurve~SGD~SIBOR~3M", "FxSpot~SGD~USD", "IRSVMVolObject~SGD~SIBOR", "IRSVMVolObject~SGD~SOR" ]
+    }
+  ]
+}
