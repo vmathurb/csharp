@@ -10,9 +10,25 @@ namespace cs.test.draw
 
         char[,] _canvasPoints = null;
 
-        const char LINE_CHAR = 'x';
-        const char HORIZONTAL_BORDER_CHAR = '-';
-        const char VERTICAL_BORDER_CHAR = '|';
+        const char CHAR_LINE = 'x';
+        const char CHAR_HORIZONTAL_BORDER = '-';
+        const char CHAR_VERTICAL_BORDER = '|';
+
+        private int _getCounter;
+        private int _setCounter;
+        private int _matchCounter;
+
+        private void ResetCounters()
+        {
+            _getCounter = 0;
+            _setCounter = 0;
+            _matchCounter = 0;
+        }
+
+        private void PrintCounters()
+        {
+            Console.WriteLine("Operation took Get:{0} Set:{1} Match:{2}", _getCounter, _setCounter, _matchCounter);
+        }
 
         private bool InCanvasHeightBounds(int y)
         {
@@ -22,6 +38,12 @@ namespace cs.test.draw
         private bool InCanvasWidthBounds(int x)
         {
             return x > 0 && x <= this._width;
+        }
+
+        private bool Match(char colorCode, char seedPointColorCode)
+        {
+            _matchCounter++;
+            return colorCode == seedPointColorCode;
         }
 
         public Canvas(int width, int height)
@@ -41,14 +63,14 @@ namespace cs.test.draw
 
             for (int i = 0; i < width + 2; i++)
             {
-                SetColorCode(i, 0, HORIZONTAL_BORDER_CHAR);
-                SetColorCode(i, height + 1, HORIZONTAL_BORDER_CHAR);
+                SetColorCode(i, 0, CHAR_HORIZONTAL_BORDER);
+                SetColorCode(i, height + 1, CHAR_HORIZONTAL_BORDER);
             }
 
             for (int i = 1; i <= height; i++)
             {
-                SetColorCode(0, i, VERTICAL_BORDER_CHAR);
-                SetColorCode(width + 1, i, VERTICAL_BORDER_CHAR);
+                SetColorCode(0, i, CHAR_VERTICAL_BORDER);
+                SetColorCode(width + 1, i, CHAR_VERTICAL_BORDER);
             }
         }
 
@@ -98,7 +120,7 @@ namespace cs.test.draw
 
                 for (int y = lower; y <= higher; y++)
                 {
-                    SetColorCode(x1, y, LINE_CHAR);
+                    SetColorCode(x1, y, CHAR_LINE);
                 }
             }
             else
@@ -108,7 +130,7 @@ namespace cs.test.draw
 
                 for (int x = lower; x <= higher; x++)
                 {
-                    SetColorCode(x, y1, LINE_CHAR);
+                    SetColorCode(x, y1, CHAR_LINE);
                 }
             }
         }
@@ -123,6 +145,8 @@ namespace cs.test.draw
 
         public void BucketFillAreaConnectedTo(int x, int y, char colorCode)
         {
+            ResetCounters();
+
             if (!InCanvasWidthBounds(x))
             {
                 throw new ArgumentOutOfRangeException(String.Format("x has to be in the range [1-{0}]", this._width));
@@ -133,24 +157,28 @@ namespace cs.test.draw
                 throw new ArgumentOutOfRangeException(String.Format("y has to be in the range [1-{0}]", this._height));
             }
 
-            if (LINE_CHAR == colorCode)
+            if (Match(CHAR_LINE, colorCode))
             {
                 throw new ArgumentOutOfRangeException("colorCode",
-                    String.Format("Fill char {0} cannot match line char {1}", colorCode, LINE_CHAR));
+                    String.Format("Fill char {0} cannot match line char {1}", colorCode, CHAR_LINE));
             }
 
-            if (LINE_CHAR == GetColorCode(x,y))
+            if (Match(CHAR_LINE, GetColorCode(x, y)))
             {
                 // NOTE: Assumption that bucket fill with point on line does nothing
                 return;
             }
 
-            ScanLineFill(x, y, colorCode);
+            Fill4WayRecursive(x, y, colorCode);
+            //FillScanLine(x, y, colorCode);
+            PrintCounters();
         }
 
-        private void Fill(int x, int y, char colorCode)
+        private void Fill4WayRecursive(int x, int y, char colorCode)
         {
-            if (colorCode == GetColorCode(x, y) || LINE_CHAR == GetColorCode(x, y))
+            char seedPointColorCode = GetColorCode(x, y);
+
+            if (Match(colorCode, seedPointColorCode) || Match(CHAR_LINE, seedPointColorCode))
             {
                 return;
             }
@@ -160,31 +188,36 @@ namespace cs.test.draw
             }
 
             if (x + 1 <= _width)
-                Fill(x + 1, y, colorCode);
+                Fill4WayRecursive(x + 1, y, colorCode);
 
             if (x - 1 > 0)
-                Fill(x - 1, y, colorCode);
+                Fill4WayRecursive(x - 1, y, colorCode);
 
             if (y + 1 <= _height)
-                Fill(x, y + 1, colorCode);
+                Fill4WayRecursive(x, y + 1, colorCode);
 
             if (y - 1 > 0)
-                Fill(x, y - 1, colorCode);
+                Fill4WayRecursive(x, y - 1, colorCode);
         }
 
-        void ScanLineFill(int x, int y, char colorCode)
+        void FillScanLine(int x, int y, char colorCode)
         {
+            ICanvasRenderer renderer = new ConsoleCanvasRenderer();
             Queue<Point> pointQueue = new Queue<Point>();
             pointQueue.Enqueue(new Point(x, y));
 
             while (pointQueue.Count > 0)
             {
+                //renderer.Render(this);
+                //System.Threading.Thread.Sleep(200);
+
                 Point p = pointQueue.Dequeue();
 
                 for (int xleft = p.X; xleft > 0; xleft--)
                 {
+                    char pointColorCode = GetColorCode(xleft, p.Y);
 
-                    if (GetColorCode(xleft, p.Y) != LINE_CHAR)
+                    if (!Match(pointColorCode, CHAR_LINE) && !Match(pointColorCode, colorCode))
                     {
                         SetColorCode(xleft, p.Y, colorCode);
                     }
@@ -193,36 +226,46 @@ namespace cs.test.draw
                         break;
                     }
 
-                    if (p.Y + 1 < _height + 1 && GetColorCode(xleft, p.Y + 1) != LINE_CHAR && GetColorCode(xleft, p.Y + 1) != colorCode)
+                    char topPointColorCode = GetColorCode(xleft, p.Y + 1);
+
+                    if (p.Y + 1 < _height + 1 && !Match(topPointColorCode, CHAR_LINE) && !Match(topPointColorCode, colorCode))
                     {
                         pointQueue.Enqueue(new Point(xleft, p.Y + 1));
                     }
 
-                    if (p.Y - 1 > 0 && GetColorCode(xleft, p.Y - 1) != LINE_CHAR && GetColorCode(xleft, p.Y - 1) != colorCode)
+                    char bottomPointColorCode = GetColorCode(xleft, p.Y - 1);
+
+                    if (p.Y - 1 > 0 && !Match(bottomPointColorCode, CHAR_LINE) && !Match(bottomPointColorCode, colorCode))
                     {
                         pointQueue.Enqueue(new Point(xleft, p.Y - 1));
                     }
                 }
 
-                for (int xright = p.X; xright < _width + 1; xright++)
+                for (int xRight = p.X + 1; xRight < _width + 1; xRight++)
                 {
-                    if (GetColorCode(xright, p.Y) != LINE_CHAR)
+                    char pointColorCode = GetColorCode(xRight, p.Y);
+
+                    if (!Match(pointColorCode, CHAR_LINE) && !Match(pointColorCode, colorCode))
                     {
-                        SetColorCode(xright, p.Y, colorCode);
+                        SetColorCode(xRight, p.Y, colorCode);
                     }
                     else
                     {
                         break;
                     }
 
-                    if (p.Y + 1 < _height + 1 && GetColorCode(xright, p.Y + 1) != LINE_CHAR && GetColorCode(xright, p.Y + 1) != colorCode)
+                    char topPointColorCode = GetColorCode(xRight, p.Y + 1);
+
+                    if (p.Y + 1 < _height + 1 && !Match(topPointColorCode, CHAR_LINE) && !Match(topPointColorCode, colorCode))
                     {
-                        pointQueue.Enqueue(new Point(xright, p.Y + 1));
+                        pointQueue.Enqueue(new Point(xRight, p.Y + 1));
                     }
 
-                    if (p.Y - 1 > 0 && GetColorCode(xright, p.Y - 1) != LINE_CHAR && GetColorCode(xright, p.Y - 1) != colorCode)
+                    char bottomPointColorCode = GetColorCode(xRight, p.Y - 1);
+
+                    if (p.Y - 1 > 0 && !Match(bottomPointColorCode, CHAR_LINE) && !Match(bottomPointColorCode, colorCode))
                     {
-                        pointQueue.Enqueue(new Point(xright, p.Y - 1));
+                        pointQueue.Enqueue(new Point(xRight, p.Y - 1));
                     }
                 }
             }
@@ -230,11 +273,13 @@ namespace cs.test.draw
 
         public char GetColorCode(int x, int y)
         {
+            _getCounter++;
             return _canvasPoints[y, x];
         }
 
         public void SetColorCode(int x, int y, char colorCode)
         {
+            _setCounter++;
             _canvasPoints[y, x] = colorCode;
         }
     }
