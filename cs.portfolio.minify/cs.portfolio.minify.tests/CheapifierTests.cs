@@ -24,7 +24,7 @@ namespace cs.portfolio.minify.tests
         }
 
         [TestMethod]
-        public void CheapifiedPortfofioHasOneTradeAtLeastPerTradeType()
+        public void CheapifiedPortfolioHasOneTradeAtLeastPerTradeType()
         {
             var portfolioName = "EMRATES";
             var cobDate = DateTime.Parse("23 Jul 2017");
@@ -38,6 +38,20 @@ namespace cs.portfolio.minify.tests
             var cheapifiedPortfolioTradeTypeUniverse = cheapifiedPortfolio.Trades.Select(t => t.TradeType).Distinct();
 
             tradeTypeUniverse.Intersect(cheapifiedPortfolioTradeTypeUniverse).Count().Should().Be(tradeTypeUniverse.Count());
+        }
+
+        [TestMethod]
+        public void CheapifiedPortfolioProvidesFullDependencyCover()
+        {
+            var portfolioName = "EMRATES";
+            var cobDate = DateTime.Parse("23 Jul 2017");
+
+            var portfolio = _portfolioProvider.GetPortfolio(portfolioName, cobDate);
+            IPortfolioMinifier cheapifier = new Cheapifier();
+
+            var cheapifiedPortfolio = cheapifier.Minify(portfolio, _portfolioCostProvider.GetPortfolioCosts(portfolioName, cobDate));
+
+            portfolio.MarketDependencies.Intersect(cheapifiedPortfolio.MarketDependencies).Count().Should().Be(portfolio.MarketDependencies.Count());
         }
     }
 }

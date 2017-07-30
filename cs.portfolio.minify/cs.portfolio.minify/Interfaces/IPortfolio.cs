@@ -7,5 +7,7 @@ namespace cs.portfolio.minify.Interfaces
         string Name { get; set; }
 
         List<ITrade> Trades { get; set; }
+
+        List<string> MarketDependencies { get; }
     }
 }

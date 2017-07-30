@@ -13,6 +13,14 @@ namespace cs.portfolio.minify
 
         public List<ITrade> Trades { get; set; }
 
+        public List<string> MarketDependencies
+        {
+            get
+            {
+                return this.Trades.Select(t => t.MarketDependencies).SelectMany(md => md).Distinct().ToList();
+            }
+        }
+
         public Portfolio(string name, List<Trade> trades)
         {
             this.Name = name;
